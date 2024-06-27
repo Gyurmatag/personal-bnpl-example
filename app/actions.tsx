@@ -3,7 +3,7 @@
 import { Installment } from "@/components/Installment";
 import { InstallmentLoading } from "@/components/InstallmentLoading";
 import { openai } from "@ai-sdk/openai";
-import { generateText } from "ai";
+import { generateObject, generateText } from "ai";
 import { streamUI } from "ai/rsc";
 import { z } from "zod";
 
@@ -28,19 +28,20 @@ const getInstallmentCardStyle = async (bio: string) => {
 };
 
 const getProductSuggestion = async (bio: string) => {
-  const { text } = await generateText({
+  const { object } = await generateObject({
     model: openai("gpt-4o"),
+    schema: z.object({
+      product: z.object({
+        item: z.string(),
+        price: z.number(),
+        emoji: z.string(),
+      }),
+    }),
     prompt: `Please write a piece of advice on what a user can buy on credit, whose Github bio is this ${bio}.
-         Also write the expected price for the item and a suggested emoji. Please answer me in exactly this JSON format for example:
-         { item: "Macbook Pro", price: "2000", emoji: "💻" }`,
+      Also write the expected price for the item and a suggested emoji.`,
   });
 
-  return JSON.parse(text) as {
-    item: string;
-    price: number;
-    emoji: string;
-    imgUrl: string;
-  };
+  return object.product;
 };
 
 const cssStringToObject = (cssString: string) => {
