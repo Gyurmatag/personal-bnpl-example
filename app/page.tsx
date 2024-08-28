@@ -3,13 +3,13 @@ import { auth, signIn } from "@/auth";
 
 export default async function Home() {
   const session = await auth();
-  let accessToken;
-  let responseJson;
+  let accessToken: string;
+  let responseJson: { bio: string } = { bio: "" };
 
   if (session) {
-    accessToken = session.accessToken;
+    accessToken = session.accessToken as string;
 
-    const response = await fetch(`https://api.github.com/user`, {
+    const response = await fetch("https://api.github.com/user", {
       headers: {
         Authorization: `Bearer ${accessToken}`,
       },
